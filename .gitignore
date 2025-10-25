@@ -1,0 +1,90 @@
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.env
+venv/
+env/
+.venv/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+
+# C / C++
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+# Go
+bin/
+*.exe
+*.test
+*.out
+
+# Rust
+target/
+
+# .NET
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Mac and Windows
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Dist / build outputs
+dist/
+build/
+out/
