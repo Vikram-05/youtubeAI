@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import VideoSession from '../models/VideoSession.js';
-
+import getYouTubeTitle from 'get-youtube-title';
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,7 +20,7 @@ function extractVideoId(url) {
 
 function fetchTranscript(youtubeUrl) {
   return new Promise((resolve, reject) => {
-    const pythonScriptPath = path.join(__dirname,'..', 'transcription.py');
+    const pythonScriptPath = path.join(__dirname, '..', 'transcription.py');
     // console.log('🐍 Python script path:', pythonScriptPath);
     // console.log('📹 YouTube URL:', youtubeUrl);
 
@@ -61,6 +61,7 @@ function fetchTranscript(youtubeUrl) {
 
 
 
+
 router.post('/get-enhanced-transcript', async (req, res) => {
   try {
     const { youtubeUrl } = req.body;
@@ -72,11 +73,17 @@ router.post('/get-enhanced-transcript', async (req, res) => {
     let transcript = '';
     try {
       transcript = await fetchTranscript(youtubeUrl);
-      console.log("tr => ",transcript)
+      console.log("tr => ", transcript)
       if (!transcript) throw new Error('Empty transcript');
     } catch {
       transcript = `Transcript not available for video ID ${videoId}.`;
     }
+    const title = await new Promise((resolve) => {
+      getYouTubeTitle(videoId, (err, title) => {
+        if (err) resolve(`YouTube Video ${videoId}`);
+        else resolve(title);
+      });
+    });
 
     const sessionId = uuidv4();
     const videoSession = new VideoSession({
@@ -84,7 +91,7 @@ router.post('/get-enhanced-transcript', async (req, res) => {
       youtubeUrl,
       videoId,
       transcript,
-      title: `YouTube Video ${videoId}`,
+      title,
       duration: 0,
       transcriptSource: 'python_youtube_api'
     });

@@ -747,10 +747,10 @@ const VideoSession = () => {
 
             {/* Main Content */}
             <main className="max-w-[1800px]   mx-auto px-6  ">
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-5 ">
                     {/* Video Player Section */}
-                    <div className="lg:col-span-3 space-y-4">
-                        <div className="bg-white/70 backdrop-blur-2xl rounded-2xl border border-white/60 overflow-hidden shadow-xl shadow-gray-200/50">
+                    <div className="lg:col-span-3 space-y-3">
+                        <div className="bg-white/70 backdrop-blur-2xl rounded-md border border-white/60 overflow-hidden shadow-xl shadow-gray-200/50">
                             {/* Video Header */}
                             <div className="px-6 py-5 border-b border-white/60 bg-white/40">
                                 <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Video Player</h2>
@@ -831,12 +831,12 @@ const VideoSession = () => {
 
                     {/* Chat Interface */}
                     <div className="lg:col-span-2">
-                        <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 backdrop-blur-3xl rounded-3xl border border-white/70 shadow-2xl shadow-gray-300/50 flex flex-col h-[calc(100vh-30px)] lg:sticky lg:top-5 overflow-hidden">
+                        <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 backdrop-blur-3xl rounded-md border border-white/70 shadow-2xl shadow-gray-300/50 flex flex-col h-[calc(100vh-30px)] lg:sticky lg:top-5 overflow-hidden">
 
                             {/* Chat Header */}
-                            <div className="px-6 py-5 border-b border-white/70 flex items-center gap-3 bg-gradient-to-r from-white/80 via-white/70 to-gray-50/60 backdrop-blur-2xl">
+                            <div className="px-6 py-2 border-b w-[80%] m-auto border-white/70 flex items-center gap-3 bg-gradient-to-r from-white/80 via-white/70 to-gray-50/60 backdrop-blur-2xl ">
                                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg shadow-gray-600/30">
-                                    <Brain className="w-5 h-5 text-white" />
+                                    <Brain className="w-5 h-5 text-white animate-bounce " />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h2 className="text-base font-semibold text-gray-900 tracking-tight">AI Tutor</h2>
@@ -966,7 +966,7 @@ const VideoSession = () => {
                             </div>
 
                             {/* Input Form */}
-                            <div className="px-6 py-5 border-t border-white/70 bg-gradient-to-r from-white/80 via-white/70 to-gray-50/60 backdrop-blur-xl">
+                            <div className="px-6 py-5 border-t bg-gradient-to-br from-white/90 to-gray-50 border border-white/60 backdrop-blur-xl ">
                                 <form onSubmit={handleAskQuestion} className="flex gap-2">
                                     <input
                                         type="text"
