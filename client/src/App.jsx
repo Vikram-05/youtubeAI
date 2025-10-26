@@ -3,7 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from './components/Home'
 import VideoSession from './components/VideoSession'
 import VideoSummary from './components/VideoSummary '
-// import Video from './components/Video'
+import Contact from './components/Contact'
+import Price from './components/Price'
+import About from './components/About'
 
 
 function App() {
@@ -14,6 +16,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/session/:sessionId" element={<VideoSession />} />
           <Route path="/summary/:sessionId" element={<VideoSummary />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/price" element={<Price />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </div>
     </Router>
