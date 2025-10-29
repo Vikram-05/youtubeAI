@@ -12,6 +12,7 @@ import mermaid from "mermaid";
 // TimeStamp Component for clickable timestamps
 const TimeStamp = ({ time, children, onTimestampClick }) => {
     const handleClick = () => {
+
         if (onTimestampClick) {
             onTimestampClick(time);
         }
@@ -130,12 +131,95 @@ const VideoSession = () => {
     const videoIframeRef = useRef(null);
     const currentUtterance = useRef(null);
     const speechRecognition = useRef(null);
+    // Import useEffect, useRef, etc. are already present
+
+    useEffect(() => {
+        let saveInterval;
+
+        function initializeYouTubePlayer() {
+            if (!session?.videoId) return;
+
+            // Destroy old player if exists
+            if (videoIframeRef.current?.player) {
+                videoIframeRef.current.player.destroy();
+                videoIframeRef.current.player = null;
+            }
+
+            // Create new YouTube player
+            videoIframeRef.current.player = new window.YT.Player("youtube-player", {
+                videoId: session.videoId,
+                playerVars: {
+                    autoplay: 1,
+                    rel: 0,
+                    start: Number(sessionStorage.getItem(`videoTime_${sessionId}`)) || 0,
+                },
+                events: {
+                    onReady: (event) => event.target.playVideo(),
+                    onStateChange: (event) => {
+                        // Save progress when playing
+                        if (event.data === window.YT.PlayerState.PLAYING) {
+                            if (!saveInterval) {
+                                saveInterval = setInterval(() => {
+                                    if (videoIframeRef.current?.player) {
+                                        const time = videoIframeRef.current.player.getCurrentTime();
+                                        sessionStorage.setItem(`videoTime_${sessionId}`, time);
+                                    }
+                                }, 2000);
+                            }
+                        } else {
+                            // Clear interval when paused or ended
+                            if (saveInterval) {
+                                clearInterval(saveInterval);
+                                saveInterval = null;
+                            }
+                        }
+                    },
+                },
+            });
+        }
+
+   
+        if (!window.YT) {
+            const tag = document.createElement("script");
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.body.appendChild(tag);
+            window.onYouTubeIframeAPIReady = initializeYouTubePlayer;
+        } else {
+            initializeYouTubePlayer();
+        }
+
+        return () => {
+            // Clean up player and interval on unmount
+            if (saveInterval) clearInterval(saveInterval);
+            if (videoIframeRef.current?.player) {
+                videoIframeRef.current.player.destroy();
+                videoIframeRef.current.player = null;
+            }
+        };
+    }, [session, sessionId]);
+
+
+    const handleTimestampClick = (timestamp) => {
+        const parts = timestamp.split(":").map(Number);
+        const seconds =
+            parts.length === 3
+                ? parts[0] * 3600 + parts[1] * 60 + parts[2]
+                : parts[0] * 60 + parts[1];
+
+        if (videoIframeRef.current?.player) {
+            videoIframeRef.current.player.seekTo(seconds, true);
+            videoIframeRef.current.player.playVideo();
+            sessionStorage.setItem(`videoTime_${sessionId}`, seconds);
+        }
+    };
+
 
 
     useEffect(() => {
 
         mermaid.initialize({ startOnLoad: true, theme: "neutral" });
         mermaid.run();
+        
     }, [summarydata]);
 
     useEffect(() => {
@@ -259,7 +343,7 @@ const VideoSession = () => {
         setSuccess('')
 
         try {
-            const response = await axios.post('/api/transcript/get-enhanced-transcript', {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/transcript/get-enhanced-transcript`, {
                 youtubeUrl
             }, {
                 timeout: 30000
@@ -310,7 +394,7 @@ const VideoSession = () => {
     const fetchSession = async () => {
         try {
             setSessionLoading(true);
-            const response = await axios.get(`/api/videos/session/${sessionId}`);
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/videos/session/${sessionId}`);
 
             if (response.data.success) {
                 setSession(response.data.session);
@@ -424,17 +508,17 @@ const VideoSession = () => {
         return 0;
     };
 
-    const handleTimestampClick = (timestamp) => {
-        const timeInSeconds = parseTimestamp(timestamp);
+    // const handleTimestampClick = (timestamp) => {
+    //     const timeInSeconds = parseTimestamp(timestamp);
 
-        if (videoIframeRef.current) {
-            console.log(`Would seek to: ${timestamp} (${timeInSeconds} seconds)`);
-            setCurrentVideoTime(timeInSeconds);
+    //     if (videoIframeRef.current) {
+    //         console.log(`Would seek to: ${timestamp} (${timeInSeconds} seconds)`);
+    //         setCurrentVideoTime(timeInSeconds);
 
-            setError(`Seeking to ${timestamp} - YouTube API integration required for full functionality`);
-            setTimeout(() => setError(''), 3000);
-        }
-    };
+    //         setError(`Seeking to ${timestamp} - YouTube API integration required for full functionality`);
+    //         setTimeout(() => setError(''), 3000);
+    //     }
+    // };
 
     const processContentWithTimestamps = (content, onTimestampClick) => {
         if (!content) return null;
@@ -515,7 +599,7 @@ const VideoSession = () => {
         setConversation(prev => [...prev, userMessage]);
 
         try {
-            const response = await axios.post('/api/chat/ask-question', {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat/ask-question`, {
                 sessionId,
                 question: userQuestion,
                 currentTime: currentVideoTime,
@@ -543,7 +627,7 @@ const VideoSession = () => {
             console.error('Failed to get AI response:', error);
 
             try {
-                const demoResponse = await axios.post('/api/chat/ask-question-demo', {
+                const demoResponse = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat/ask-question-demo`, {
                     sessionId,
                     question: userQuestion,
                     currentTime: currentVideoTime,
@@ -586,7 +670,7 @@ const VideoSession = () => {
         } else {
 
             try {
-                const response = await axios.post('/api/chat/generate-summary', {
+                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat/generate-summary`, {
                     sessionId,
                 });
 
@@ -760,14 +844,10 @@ const VideoSession = () => {
                             {/* Video Player */}
                             <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 aspect-video">
                                 {session?.videoId && (
-                                    <iframe
-                                        ref={videoIframeRef}
-                                        src={`https://www.youtube.com/embed/${session.videoId}?autoplay=1&rel=0`}
-                                        className="w-full h-full"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        title="YouTube video player"
-                                    ></iframe>
+                                    <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 aspect-video">
+                                        <div id="youtube-player" ref={videoIframeRef} className="w-full h-full"></div>
+                                    </div>
+
                                 )}
                             </div>
 
@@ -792,36 +872,36 @@ const VideoSession = () => {
                                         </p>
                                     </div>
                                     {
-                summarydata || (localStorage.getItem(sessionId)) ?
-                (
-                    <button onClick={() => { navigate(`/summary/${sessionId}`, { state: { summary: summarydata } }) }} className="rounded-md bg-black text-white px-4 py-2"> View </button>)
-                    :
+                                        summarydata || (localStorage.getItem(sessionId)) ?
+                                            (
+                                                <button onClick={() => { navigate(`/summary/${sessionId}`, { state: { summary: summarydata } }) }} className="rounded-md bg-black text-white px-4 py-2"> View </button>)
+                                            :
 
-                                    <button
-                                        onClick={handleGetSummary}
-                                        disabled={isSummaryLoading}
-                                        className={`
+                                            <button
+                                                onClick={handleGetSummary}
+                                                disabled={isSummaryLoading}
+                                                className={`
     relative px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300
     flex items-center justify-center gap-2
     ${isSummaryLoading
-                                                ? "bg-gray-200 text-gray-600 cursor-not-allowed"
-                                                : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white hover:from-gray-800 hover:to-gray-900 hover:scale-105 active:scale-95 shadow-md shadow-gray-700/30"}
+                                                        ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                                                        : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white hover:from-gray-800 hover:to-gray-900 hover:scale-105 active:scale-95 shadow-md shadow-gray-700/30"}
   `}
-                                    >
-                                        {isSummaryLoading ? (
-                                            <>
-                                                <AiOutlineLoading3Quarters className="animate-spin text-lg" />
-                                                <span>Loading...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <AiOutlineFileText className="text-lg" />
-                                                <span>Summary</span>
-                                            </>
-                                        )}
-                                    </button>
-                
-            }
+                                            >
+                                                {isSummaryLoading ? (
+                                                    <>
+                                                        <AiOutlineLoading3Quarters className="animate-spin text-lg" />
+                                                        <span>Loading...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <AiOutlineFileText className="text-lg" />
+                                                        <span>Summary</span>
+                                                    </>
+                                                )}
+                                            </button>
+
+                                    }
                                 </div>
 
 
@@ -1026,4 +1106,4 @@ const VideoSession = () => {
     );
 };
 
-export default VideoSession;
+export default VideoSession

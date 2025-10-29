@@ -1,11 +1,11 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function Navbar() {
+function Navbar({onOpen}) {
     const navigate = useNavigate()
     return (
         <nav className="fixed top-0 left-0 w-full z-[1000]">
-            <div className="md:w-[800px] m-auto md:rounded-full border border-gray-200 bg-white/80 backdrop-blur-xl shadow-sm mt-2">
+            <div className="md:w-[800px] m-auto md:rounded-full border border-gray-200 bg-white/80 backdrop-blur-xl shadow-sm md:mt-2">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div onClick={() => navigate("/")} className="cursor-pointer flex items-center space-x-2">
@@ -22,10 +22,10 @@ function Navbar() {
                         </div>
                         <div className="flex items-center space-x-3">
                             <button
-                                onClick={() => inputRef.current?.focus()}
+                                onClick={onOpen}
                                 className="bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
                             >
-                                Get Started
+                                Sign In
                             </button>
                         </div>
                     </div>

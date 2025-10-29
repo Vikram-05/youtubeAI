@@ -11,6 +11,7 @@ import Testimonials from './Testimonials'
 import HowItWorks from './HowItWorks';
 import Features from './Features';
 import Navbar from './Navbar';
+import Login from './Login';
 
 
 function Home() {
@@ -21,6 +22,7 @@ function Home() {
   const [success, setSuccess] = useState('')
   const [isLink, setIsLink] = useState(false)
   const navigate = useNavigate()
+  const [isLoginOpen,setIsLoginOpen] = useState(false)
 
   const extractVideoId = (url) => {
     const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
@@ -38,7 +40,7 @@ function Home() {
 
     setValidating(true);
     try {
-      const response = await axios.post('/api/simple/validate-url', {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/simple/validate-url`, {
         youtubeUrl: url
       });
 
@@ -66,7 +68,7 @@ function Home() {
     setSuccess('')
 
     try {
-      const response = await axios.post('/api/transcript/get-enhanced-transcript', {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/transcript/get-enhanced-transcript`, {
         youtubeUrl
       }, {
         timeout: 30000
@@ -126,7 +128,7 @@ function Home() {
         linear-gradient(to right, #e2e8f0 0.5px, transparent 1px),
         linear-gradient(to bottom, #e2e8f0 0.5px, transparent 1px)
       `,
-            backgroundSize: "50px 60px", // ✅ fixed typo
+            backgroundSize: "50px 60px", 
             WebkitMaskImage:
               "radial-gradient(ellipse 70% 60% at 50% 0%, #000 60%, transparent 100%)",
             maskImage:
@@ -135,13 +137,15 @@ function Home() {
         />
 
 
-        <Navbar/>
+        <Navbar onOpen={() => setIsLoginOpen(true)}/>
+
+         <Login isLoginOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
 
 
         <section className="relative z-50 pt-32 pb-24 px-4 sm:px-6 lg:px-8 border-b border-gray-200">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2 mb-6">
-              <HiOutlineSparkles className="w-4 h-4 text-gray-700" />
+              <HiOutlineSparkles className="w-4 h-4 text-gray-700 animate-bounce" />
               <span className="text-sm text-gray-700">AI-Powered Learning</span>
             </div>
 
@@ -154,9 +158,9 @@ function Home() {
             </p>
 
             {/* //Input Section */}
-            <div className="max-w-2xl mx-auto">
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-2 flex items-center space-x-2 hover:border-gray-300 transition-colors">
-                <FaLink className="w-5 h-5 text-gray-400 ml-3" />
+            <div className="max-w-2xl mx-auto px-4 sm:px-6">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-2 sm:p-3 flex items-center space-x-1 sm:space-x-2 hover:border-gray-300 transition-colors">
+                <FaLink className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-2 sm:ml-3 flex-shrink-0" />
                 <input
                   ref={inputRef}
                   type="url"
@@ -165,34 +169,35 @@ function Home() {
                   onChange={handleUrlChange}
                   required
                   placeholder="Paste YouTube URL here..."
-                  className="flex-1 bg-transparent outline-none text-base px-2 py-3 text-gray-900 placeholder-gray-400"
+                  className="flex-1 bg-transparent outline-none text-sm sm:text-base px-2 py-2 sm:py-3 text-gray-900 placeholder-gray-400 min-w-0"
                 />
                 <IoMdClose
                   onClick={() => setYoutubeUrl('')}
-                  className={`text-4xl p-2 cursor-pointer hover:bg-gray-200 transition-all rounded-xl ${youtubeUrl.length === 0 ? 'hidden' : 'flex'
-                    }`}
+                  className={`text-2xl sm:text-3xl p-1 sm:p-2 cursor-pointer hover:bg-gray-200 transition-all rounded-lg sm:rounded-xl ${youtubeUrl.length === 0 ? 'hidden' : 'flex'
+                    } flex-shrink-0`}
                 />
                 <button
                   onClick={handleSubmit}
                   disabled={loading || !youtubeUrl}
-                  className="bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium flex items-center space-x-2 gap-3 group cursor-pointer"
+                  className="bg-gray-900 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-gray-800 transition-colors text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2 gap-1 sm:gap-3 group cursor-pointer flex-shrink-0"
                 >
                   {loading ? (
                     <>
-                      Starting...
-                      <Loader2 className="w-5 h-5 animate-spin mr-3" />
+                      <span className="hidden xs:inline">Starting...</span>
+                      <span className="xs:hidden">Start</span>
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                     </>
                   ) : (
                     <>
-                      Start
-                      <FaArrowRightLong className="w-4 h-4 group-hover:translate-x-2 transition-all" />
+                      <span>Start</span>
+                      <FaArrowRightLong className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 sm:group-hover:translate-x-2 transition-all" />
                     </>
                   )}
                 </button>
               </div>
 
-              <p className="text-xs text-gray-500 mt-3 flex items-center justify-center space-x-1">
-                <i data-lucide="shield-check" className="w-3 h-3"></i>
+              <p className="text-xs text-gray-500 mt-2 sm:mt-3 flex items-center justify-center space-x-1 text-center px-2">
+                <i data-lucide="shield-check" className="w-3 h-3 flex-shrink-0"></i>
                 <span>No credit card required • Free 3 videos per day</span>
               </p>
             </div>
