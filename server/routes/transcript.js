@@ -21,12 +21,11 @@ function extractVideoId(url) {
 function fetchTranscript(youtubeUrl) {
   return new Promise((resolve, reject) => {
     const pythonScriptPath = path.join(__dirname, '..', 'transcription.py');
+    // console.log('🐍 Python script path:', pythonScriptPath);
+    // console.log('📹 YouTube URL:', youtubeUrl);
 
-    // Prefer an explicit python binary - Render has python3; allow override via env var PYTHON
-    const PY_BIN = process.env.PYTHON || 'python3';
+    const pythonProcess = spawn('python', [pythonScriptPath, youtubeUrl]);
 
-    const pythonProcess = spawn(PY_BIN, [pythonScriptPath, youtubeUrl], { env: process.env });
-    
     let transcript = '';
     let errorOutput = '';
 
